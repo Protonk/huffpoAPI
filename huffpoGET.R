@@ -18,16 +18,14 @@ huffpoFriendly <- function(path, state = NULL, topic = NULL, page = NULL) {
 	if (!is.null(state)) {
 		# Fuzzy search for full state names
 		stateconvert <- function(state) {
-			state.abb.plus <- c(state.abb, "US")
-			state.name.plus <- c(state.name, "United States")
-			fullstate.parm <- sapply(state.name.plus, function(y) { agrep(y, state, ignore.case = TRUE)})
+			fullstate.parm <- sapply(c(state.name, "United States"), function(y) { agrep(y, state, ignore.case = TRUE)})
 			# returns only the state we asked for
 			fullstate.parm <- Filter(length, fullstate.parm)
 			# if we got a match, convert the name to the abbreviation
 			if (length(fullstate.parm) > 0) {
-				state <- state.abb.plus[state.name.plus %in% names(fullstate.parm)]
+				state <- c(state.abb, "US")[c(state.name, "United States") %in% names(fullstate.parm)]
 			} else {
-				state <- match.arg(toupper(state), state.abb.plus)
+				state <- match.arg(toupper(state), c(state.abb, "US"))
 			}
 		}
 		state <- trim(state)
