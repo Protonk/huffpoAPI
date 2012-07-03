@@ -39,6 +39,6 @@ xPathGen <- function(root, ...) {
   # The paste(c("arg1", "arg2"), collapse = "/") trick is to get around
   # unwanted behavior when what would be the 2nd arg is missing
   root <- paste0("//", root)
-  root <- paste(c(root, gsub("^/|/$", "", unlist(children))), collapse = "/")
-  gsub("/(?=\\[)", "", root, perl = TRUE)
+  final <- paste(c(root, gsub("^/|/$", "", unlist(children))), collapse = "/")
+  gsub("/(?=\\[)", "", final, perl = TRUE)
 }
