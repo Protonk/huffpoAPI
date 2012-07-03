@@ -91,7 +91,7 @@ huffpoGETslim <- function(path, format = "xml", state = NULL, topic = NULL, page
 														 polls =  "pollster/api/polls")
 	url.premod <- paste(url.premod, switch(format, json = ".json",xml = ".xml"), sep = "")
 	
-	if (is.null(c(state, topic)) {
+	if (is.null(c(state, topic))) {
 		stop("Enter at least one query")
 	}
 	
