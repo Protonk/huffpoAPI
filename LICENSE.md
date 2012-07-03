@@ -1,0 +1,1 @@
+All code, insofar as I have the authority to do so, is released under the [MIT License](http://www.opensource.org/licenses/MIT). 
