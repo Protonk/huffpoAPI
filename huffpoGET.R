@@ -15,12 +15,9 @@ huffpoGETbase <- function(path, format = "xml", state = NULL, topic = NULL, page
 	huffpo <- "http://elections.huffingtonpost.com"
 	path <- match.arg(tolower(path), c("charts", "polls"))
 	url.premod <- switch(path,
-											 charts = "pollster/api/charts",
-											 polls =  "pollster/api/polls")
-	url.premod <- paste(url.premod, switch(format, 
-																					 json = ".json", 
-																					 xml = ".xml"), 
-																					 sep = "")
+												charts = "pollster/api/charts",
+												polls =  "pollster/api/polls")
+	url.premod <- paste(url.premod, switch(format, json = ".json",xml = ".xml"), sep = "")
 	
 	# Not all arguments are required (non are, actually)
 	arg.names <- character(0)
@@ -49,13 +46,9 @@ huffpoGETbase <- function(path, format = "xml", state = NULL, topic = NULL, page
 	
 	# Topic can be colloquial or exact.
 	if (!is.null(topic)) {
-		topic.args <- c("house", "senate", "governor", 
-										"president","job approval", 
-										"primary")
-		topic.API.value <- c("2012-house", "2012-senate", "2012-governor", 
-												 "2012-president", "obama-job-approval", 
-												 "2012-gop-primary")
-	
+		topic.args <- c("house", "senate", "governor", "president","job approval", "primary")
+		topic.API.value <- c("2012-house", "2012-senate", "2012-governor", "2012-president", 
+												 "obama-job-approval", "2012-gop-primary")
 		topic <- trim(topic)
 		if (grepl("^2012|^obama", topic, ignore.case = TRUE)) {
 			# hyphens as it will eventually go into a URL
@@ -99,10 +92,8 @@ huffpoGETslim <- function(path, format = "xml", state = NULL, topic = NULL, page
                      	charts = "pollster/api/charts",
                      	chart = "pollster/api/charts",
                      	polls =  "pollster/api/polls")
-	url.premod <- paste(url.premod, switch(format, 
-                                         json = ".json", 
-                                         xml = ".xml"), 
-                                         sep = "")
+	url.premod <- paste(url.premod, switch(format, json = ".json",xml = ".xml"), sep = "")
+	
 	if (is.null(c(state, topic)) {
 		stop("Enter at least one query")
 	}
