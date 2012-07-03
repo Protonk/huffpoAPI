@@ -2,7 +2,7 @@
 # builds the path (minus queries) so we don't have to worry about it later
 huffurl <- function(path) {
   huffpo <- "http://elections.huffingtonpost.com/pollster/api"
-  path <- paste(match.arg(tolower(path), c("charts", "polls")), "xml", sep = ".")
+  path <- paste0(match.arg(tolower(path), c("charts", "polls")), ".xml")
   return(paste(huffpo, path, sep = "/"))
 }
 
