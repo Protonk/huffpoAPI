@@ -14,9 +14,7 @@ huffpoGETbase <- function(path, format = "xml", state = NULL, topic = NULL, page
 	# builds the path (minus queries) so we don't have to worry about it later
 	huffpo <- "http://elections.huffingtonpost.com"
 	path <- match.arg(tolower(path), c("charts", "polls"))
-	url.premod <- switch(path,
-												charts = "pollster/api/charts",
-												polls =  "pollster/api/polls")
+	url.premod <- switch(path, charts = "pollster/api/charts", polls =  "pollster/api/polls")
 	url.premod <- paste(url.premod, switch(format, json = ".json",xml = ".xml"), sep = "")
 	
 	# Not all arguments are required (non are, actually)
@@ -88,39 +86,19 @@ huffpoGETbase <- function(path, format = "xml", state = NULL, topic = NULL, page
 huffpoGETslim <- function(path, format = "xml", state = NULL, topic = NULL, page = NULL) {
 	huffpo <- "http://elections.huffingtonpost.com"
 	path <- match.arg(tolower(path), c("charts", "chart", "polls"))
-	url.premod <- switch(path,
-                     	charts = "pollster/api/charts",
-                     	chart = "pollster/api/charts",
-                     	polls =  "pollster/api/polls")
+	url.premod <- switch(path, charts = "pollster/api/charts",
+														 chart = "pollster/api/charts",
+														 polls =  "pollster/api/polls")
 	url.premod <- paste(url.premod, switch(format, json = ".json",xml = ".xml"), sep = "")
 	
 	if (is.null(c(state, topic)) {
 		stop("Enter at least one query")
 	}
 	
-	arg.names <- character(0)
-	
-	if (!is.null(state)) {
-		state <- trim(state)
-		arg.names <- append(arg.names, "state")
-	}
-	
-	if (!is.null(topic)) {
-		topic <- trim(topic)
-		# hyphens as it will eventually go into a URL
-		topic <- gsub("\\s+", "-", topic)
-		arg.names <- append(arg.names, "topic")
-	}
-	
-	if (!is.null(page)) {
-		page <- as.numeric(page[1])
-		arg.names <- append(arg.names, "page")
-	}
-	
-	# simplified from the above due to forcing a query
+	arg.names <- c("state", "topic", "page")
 	arg.values <- c(state, topic, page)
-	final.query <- NULL
-	final.query <- paste(arg.names, arg.values, sep = "=", collapse = "&")	
+	arg.index <- sapply(list(state, topic, page), function(x) !is.null(x))
+	final.query <- paste(arg.names[arg.index], arg.values[arg.index], sep = "=", collapse = "&")
 
 	GET(url = huffpo, path = url.premod, query = final.query)
 }
