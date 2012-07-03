@@ -10,7 +10,8 @@ Relatively simple connection to Huffpo's API
    
 ## What works now
 
-- Basically only a GET request for charts or polls. That works fine, tho
+- Requests for charts or polls (both a user friendly version and a simpler, more dangerous version)
+- Some xPath helper functions like building expressions including conditionals
 
 ## What may work in the future
 
