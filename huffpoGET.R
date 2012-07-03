@@ -7,7 +7,7 @@
 library(httr)
 
 
-huffpoGETmultiple <- function(path, format = "xml", state = NULL, topic = NULL, page = NULL) {
+huffpoGETbase <- function(path, format = "xml", state = NULL, topic = NULL, page = NULL) {
 
 # builds the path (minus queries) so we don't have to worry about it later
 huffpo.base <- "http://elections.huffingtonpost.com"
@@ -84,7 +84,7 @@ final.query <- NULL
 if (!is.null(arg.values)) {
 	final.query <- paste(arg.names, arg.values, sep = "=", collapse = "&")	
 }
-
+# all this for a call to GET()!
+# this'll be sad if I put this into a UI and all the above is a waste
 GET(url = huffpo.base, path = url.premod, query = final.query)
-
 }
