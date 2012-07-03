@@ -17,8 +17,7 @@ huffpoGETbase <- function(path, format = "xml", state = NULL, topic = NULL, page
 	url.premod <- switch(path, charts = "pollster/api/charts", polls =  "pollster/api/polls")
 	url.premod <- paste(url.premod, switch(format, json = ".json",xml = ".xml"), sep = "")
 	
-	# Not all arguments are required (non are, actually)
-	arg.names <- character(0)
+	# Not all query arguments are required (non are, actually)
 	
 	# State can be "US", in which case we won't find it among the state abbreviations
 	# rather than add another if statement, we just add it in.
@@ -39,7 +38,6 @@ huffpoGETbase <- function(path, format = "xml", state = NULL, topic = NULL, page
 		}
 		state <- trim(state)
 		state <- stateconvert(state)
-		arg.names <- append(arg.names, "state")
 	}
 	
 	# Topic can be colloquial or exact.
@@ -56,7 +54,6 @@ huffpoGETbase <- function(path, format = "xml", state = NULL, topic = NULL, page
 			topic <- match.arg(tolower(topic), topic.args)
 			topic <- topic.API.value[topic.args %in% topic]
 		}
-		arg.names <- append(arg.names, "topic")
 	}
 	
 	# ignores page names otherwise takes only the first one
@@ -65,24 +62,23 @@ huffpoGETbase <- function(path, format = "xml", state = NULL, topic = NULL, page
 		page <- NULL
 	} else {
 		page <- as.numeric(page[1])
-		arg.names <- append(arg.names, "page")
 	}
 	
-	# we've populated the names already. Any NULL object will not show up in
-	# arg.values. 
-	
+	arg.names <- c("state", "topic", "page")
 	arg.values <- c(state, topic, page)
+	arg.index <- sapply(list(state, topic, page), function(x) !is.null(x))
+	# if statement needed here because request can be made w/o queries
 	final.query <- NULL
-	
 	if (!is.null(arg.values)) {
-		final.query <- paste(arg.names, arg.values, sep = "=", collapse = "&")	
+		final.query <- paste(arg.names[arg.index], arg.values[arg.index], sep = "=", collapse = "&")
 	}
-	# all this for a call to GET()!
+	
 	GET(url = huffpo, path = url.premod, query = final.query)
 }
 
 
-
+### MUCH shorter function without all that mess above.
+# assumes arguments are entered exactly (and that they exist)
 huffpoGETslim <- function(path, format = "xml", state = NULL, topic = NULL, page = NULL) {
 	huffpo <- "http://elections.huffingtonpost.com"
 	path <- match.arg(tolower(path), c("charts", "chart", "polls"))
