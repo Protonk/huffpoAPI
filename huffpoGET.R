@@ -1,22 +1,13 @@
-## function to send GET requests for charts and polls (not singular chart)
+## function to build GET requests for charts and polls
 
-# httr is not on CRAN. In order to install it you need the development tools for R
-# and package "devtools" (which is on CRAN, thankfully!)
-
-# then you can get httr w/ install_github("httr")
-library(httr)
-
-
-huffpoGETbase <- function(path, format = "xml", state = NULL, topic = NULL, page = NULL) {
+huffpoFriendly <- function(path, state = NULL, topic = NULL, page = NULL) {
 	trim <- function (x) {
 		gsub("^\\s+|\\s+$", "", x)
 	}
 	# builds the path (minus queries) so we don't have to worry about it later
-	huffpo <- "http://elections.huffingtonpost.com"
-	path <- match.arg(tolower(path), c("charts", "polls"))
-	url.premod <- switch(path, charts = "pollster/api/charts", polls =  "pollster/api/polls")
-	url.premod <- paste(url.premod, switch(format, json = ".json",xml = ".xml"), sep = "")
-	
+	huffpo <- "http://elections.huffingtonpost.com/pollster/api"
+	path <- paste(match.arg(tolower(path), c("charts", "polls")), "xml", sep = ".")
+	baseurl <- paste(huffpo, path, sep = "/")
 	# Not all query arguments are required (non are, actually)
 	
 	# State can be "US", in which case we won't find it among the state abbreviations
@@ -56,45 +47,39 @@ huffpoGETbase <- function(path, format = "xml", state = NULL, topic = NULL, page
 		}
 	}
 	
-	# ignores page names otherwise takes only the first one
-	# this will eventually become a proper match statement
+	# For now, page isn't ignored for non-poll requests
 	if (path != "polls") {
 		page <- NULL
-	} else {
-		page <- as.numeric(page[1])
 	}
 	
 	arg.names <- c("state", "topic", "page")
 	arg.values <- c(state, topic, page)
 	arg.index <- sapply(list(state, topic, page), function(x) !is.null(x))
 	# if statement needed here because request can be made w/o queries
-	final.query <- NULL
+	query <- NULL
+  out <- baseurl
 	if (!is.null(arg.values)) {
-		final.query <- paste(arg.names[arg.index], arg.values[arg.index], sep = "=", collapse = "&")
-	}
-	
-	GET(url = huffpo, path = url.premod, query = final.query)
+		query <- paste(arg.names[arg.index], arg.values[arg.index], sep = "=", collapse = "&")
+	  out <- paste(baseurl, query, sep = "?")
+  }
+	return(out)
 }
 
 
-### MUCH shorter function without all that mess above.
-# assumes arguments are entered exactly (and that they exist)
-huffpoGETslim <- function(path, format = "xml", state = NULL, topic = NULL, page = NULL) {
-	huffpo <- "http://elections.huffingtonpost.com"
-	path <- match.arg(tolower(path), c("charts", "chart", "polls"))
-	url.premod <- switch(path, charts = "pollster/api/charts",
-														 chart = "pollster/api/charts",
-														 polls =  "pollster/api/polls")
-	url.premod <- paste(url.premod, switch(format, json = ".json",xml = ".xml"), sep = "")
-	
-	if (is.null(c(state, topic))) {
+# Much shorter function to generate queries
+# Very rigid assumptions about correctness of inputs
+
+huffpoSlim <- function(path, state = NULL, topic = NULL, page = NULL) {
+  huffpo <- "http://elections.huffingtonpost.com/pollster/api"
+  path <- paste(match.arg(tolower(path), c("charts", "chart", "polls")), "xml", sep = ".")
+  baseurl <- paste(huffpo, path, sep = "/")
+  
+  if (is.null(c(state, topic))) {
 		stop("Enter at least one query")
 	}
-	
 	arg.names <- c("state", "topic", "page")
 	arg.values <- c(state, topic, page)
 	arg.index <- sapply(list(state, topic, page), function(x) !is.null(x))
-	final.query <- paste(arg.names[arg.index], arg.values[arg.index], sep = "=", collapse = "&")
-
-	GET(url = huffpo, path = url.premod, query = final.query)
+  query <- paste(arg.names[arg.index], arg.values[arg.index], sep = "=", collapse = "&")
+  return(paste(baseurl, query, sep = "?"))
 }
