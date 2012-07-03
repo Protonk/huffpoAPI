@@ -76,15 +76,15 @@ if (path != "polls") {
 }
 
 # we've populated the names already. Any NULL object will not show up in
-# arg.values. If they're all NULL then just get the base query
-# we've checked twice by now but that's not really slow
+# arg.values. 
+
 arg.values <- c(state, topic, page)
+final.query <- NULL
+
 if (!is.null(arg.values)) {
-	final.query <- paste(arg.names, arg.values, sep = "=", collapse = "&")
-	GET(url = huffpo.base, path = url.premod, query = final.query)
-} else {
-	GET(url = huffpo.base, path = url.premod)
+	final.query <- paste(arg.names, arg.values, sep = "=", collapse = "&")	
 }
 
+GET(url = huffpo.base, path = url.premod, query = final.query)
 
 }
