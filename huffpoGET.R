@@ -1,13 +1,16 @@
 ## function to build GET requests for charts and polls
+# builds the path (minus queries) so we don't have to worry about it later
+huffurl <- function(path) {
+  huffpo <- "http://elections.huffingtonpost.com/pollster/api"
+  path <- paste(match.arg(tolower(path), c("charts", "polls")), "xml", sep = ".")
+  return(paste(huffpo, path, sep = "/"))
+}
+
 
 huffpoFriendly <- function(path, state = NULL, topic = NULL, page = NULL) {
 	trim <- function (x) {
 		gsub("^\\s+|\\s+$", "", x)
 	}
-	# builds the path (minus queries) so we don't have to worry about it later
-	huffpo <- "http://elections.huffingtonpost.com/pollster/api"
-	path <- paste(match.arg(tolower(path), c("charts", "polls")), "xml", sep = ".")
-	baseurl <- paste(huffpo, path, sep = "/")
 	# Not all query arguments are required (non are, actually)
 	
 	# State can be "US", in which case we won't find it among the state abbreviations
@@ -47,39 +50,26 @@ huffpoFriendly <- function(path, state = NULL, topic = NULL, page = NULL) {
 		}
 	}
 	
-	# For now, page isn't ignored for non-poll requests
+	# For now, page is ignored for non-poll requests
 	if (path != "polls") {
 		page <- NULL
 	}
-	
-	arg.names <- c("state", "topic", "page")
-	arg.values <- c(state, topic, page)
-	arg.index <- sapply(list(state, topic, page), function(x) !is.null(x))
-	# if statement needed here because request can be made w/o queries
-	query <- NULL
-  out <- baseurl
-	if (!is.null(arg.values)) {
-		query <- paste(arg.names[arg.index], arg.values[arg.index], sep = "=", collapse = "&")
-	  out <- paste(baseurl, query, sep = "?")
-  }
-	return(out)
+	# Filter() is awesome. Drop null optional arguments (even if specified as NULL)
+	arglist <- Filter(length, list(state = state, topic = topic, page = page))
+	# Names on the left, values on the right
+	query <- paste(names(arglist), sapply(arglist, `[`), sep = "=", collapse = "&")
+	return(paste(huffurl(path), query, sep = "?"))
 }
 
 
 # Much shorter function to generate queries
-# Very rigid assumptions about correctness of inputs
+# flexible query construction, which allows the user to pass
+# inalid queries. But it isn't in the way
 
-huffpoSlim <- function(path, state = NULL, topic = NULL, page = NULL) {
-  huffpo <- "http://elections.huffingtonpost.com/pollster/api"
-  path <- paste(match.arg(tolower(path), c("charts", "chart", "polls")), "xml", sep = ".")
-  baseurl <- paste(huffpo, path, sep = "/")
-  
-  if (is.null(c(state, topic))) {
-		stop("Enter at least one query")
-	}
-	arg.names <- c("state", "topic", "page")
-	arg.values <- c(state, topic, page)
-	arg.index <- sapply(list(state, topic, page), function(x) !is.null(x))
-  query <- paste(arg.names[arg.index], arg.values[arg.index], sep = "=", collapse = "&")
-  return(paste(baseurl, query, sep = "?"))
+huffpoSlim <- function(path, ...) {
+  # Filter() is awesome. Drop null optional arguments (even if specified as NULL)
+  arglist <- Filter(length, list(...))
+  # Names on the left, values on the right
+  query <- paste(names(arglist), sapply(arglist, `[`), sep = "=", collapse = "&")
+  return(paste(huffurl(path), query, sep = "?"))
 }
