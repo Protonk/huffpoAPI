@@ -13,22 +13,23 @@
 ## elcomp = "bob>20"
 # I assume the single quoted string is on the right if you
 # offfer 3 elements.
-# none of the arguments need be named. You can just pass
-# a list if you want
+
+# ONLY TAKES A SINGLE LIST for optional elements
 
 xPathGen <- function(root, ...) {
+  # comparisons still must be length 3 char vectors
+  # with the third element as the quoted string
   genComp <- function(x) {
-    x <- unlist(x)
-    if (length(x) == 3) {
-      x[3] <- paste0("'",x[3], "'")
-      x.flat <- paste(x, collapse = "")
+    comp <- unlist(x)
+    if (length(comp) == 3) {
+      comp[3] <- paste0("'",x[3], "'")
+      comp.flat <- paste(comp, collapse = "")
     } else {
-      x.flat <- x
+      comp.flat <- comp
     }
-    paste0("[", x.flat, "]")
+    paste0("[", comp.flat, "]")
   }
-  if (!is.list(...)) {list(...)}
-  
+
   # plucks out comparisons and applies genComp (formatting them properly)
   # preserves order
   children <- Filter(length, ...)
