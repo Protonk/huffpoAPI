@@ -93,17 +93,17 @@ pollToDf <- function(parsed.list) {
 # as we're downloding this over the internet
 # also it allows us to put in a wait statement if we want
 
-stateDownload <- function(state) {
+stateDownload <- function(state, topic) {
   n <- 10
   i <- 1
   while (n == 10) {
     page.in <- fromJSON(huffpoSlim(path = "polls", format = "json", 
-                                   state = state, page = i))
+                                   state = state, topic = topic, page = i))
     assign(paste("poll.page", i, sep = ""), page.in)
     if (i == 1) {
-      poll.full <<- poll.page1
+      poll.full <- poll.page1
     } else {
-      poll.full <<- append(poll.full, get(paste("poll.page", i, sep = "")))
+      poll.full <- append(poll.full, get(paste("poll.page", i, sep = "")))
     }
     n <- length(laply(page.in, `[[`, 1))
     i <- i + 1
@@ -113,8 +113,8 @@ stateDownload <- function(state) {
 
 # Calls each of the above functions. Accepts a state as an argument
 
-stateDFgen <- function(state) {
-  dl <- stateDownload(state)
+stateDfGen <- function(state, topic) {
+  dl <- stateDownload(state, topic)
   polls <- pollGrab(dl)
   df.out <- ldply(lapply(polls, pollToDf))
   # Poll responses were coded as factors
