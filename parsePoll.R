@@ -48,19 +48,19 @@ stateDfGen <- function(state, topic) {
                           state = state, topic = topic, page = i)
     assign(paste("poll.page", i, sep = ""), page.in)
     if (i == 1) {
-      poll.full <- poll.page1
+      state.poll.full <- poll.page1
     } else {
-      poll.full <- append(poll.full, get(paste("poll.page", i, sep = "")))
+      state.poll.full <- append(state.poll.full, get(paste("poll.page", i, sep = "")))
     }
     n <- length(laply(page.in, `[[`, 1))
     i <- i + 1
   }
   # some states have no polls for certain topics.
-  if (length(poll.full) == 0) {
+  if (length(state.poll.full) == 0) {
     return(NULL)
   }
   # pages of polls are lists of lists with each top element only having one child
-  polls.by.question <- llply(poll.full, pollGrab)
+  polls.by.question <- llply(state.poll.full, pollGrab)
   # each poll may have multiple questions, so some may have more than one
   # child. To keep pollToDf simple, we drop the first level of nesting
   polls.by.question <- unlist(polls.by.question, recursive = FALSE)
