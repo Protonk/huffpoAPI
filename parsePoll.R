@@ -4,8 +4,38 @@ library(plyr)
 
 pollGrab <- function(poll) {
   pollToDf <- function(parsed.list) {
-    outcomes <- unlist(parsed.list[["percent"]])
-    choices <- unlist(parsed.list[["choice"]])
+    mergeResponses <- function(res, res.name) {
+      # Don't bother if it isn't job approval
+      # some polls use 3 p's!
+      if (any(grepl("appp?rove|favor|wrong", res.name, ignore.case = TRUE))) {
+        # bin into 3 categories
+        reg.vec <-  c("(^|\\s+)disappp?rove|wrong|unfavorable|negative",
+                      "(^|\\s+)appp?rove|right|(^|\\s+)favorable|positive",
+                      "undecided|neither|not heard enough")
+        names.out <- c("Merged.Disapproval", "Merged.Approval", "Merged.Neutral")
+        for (i in 1:3) {
+          merge.ind <- grepl(reg.vec[i], res.name, ignore.case = TRUE)
+          if (!any(merge.ind)) {
+            return(list(outcomes = res, choices = res.name))
+          }
+          summed <- sum(as.numeric(res[merge.ind]), na.rm = TRUE)
+          res <- append(res, as.character(summed))
+          res.name <- append(res.name, names.out[i])
+        }
+        return(list(outcomes = res, choices = res.name))
+      } else {
+        return(list(outcomes = res, choices = res.name))
+      }
+    }
+    if (merge = TRUE) {
+      results <- mergeResponses(res = unlist(parsed.list[["percent"]]),
+                                res.name = unlist(parsed.list[["choice"]]))
+      outcomes <- results$outcomes
+      choices <- results$choices
+    } else {
+      outcomes <- unlist(parsed.list[["percent"]])
+      choices <- unlist(parsed.list[["choice"]])
+    }                         
     parsed.list[["choice"]] <- parsed.list[["percent"]] <-  NULL
     ques.names <- Filter(nchar, names(parsed.list))
     info <- unlist(parsed.list)
@@ -24,6 +54,12 @@ pollGrab <- function(poll) {
     q.in[["responses"]] <- NULL
     resp.mat <- do.call(rbind, responses)
     resp.mat <- matrix(unlist(resp.mat), dim(resp.mat))
+    # Some polls squish multiple subgroups into one set of responses
+    # will eventually disambiguate these but drop for now.
+    if (!all(is.na(resp.mat[, 4]))) {
+      retain.ind <- which(resp.mat[, 4] == resp.mat[which.max(resp.mat[, 4]), 4])
+      resp.mat <- resp.mat[retain.ind, ]
+    }
     resp.list <- list(choice = resp.mat[, 1],
                       percent = resp.mat[, 2],
                       subpopulation = resp.mat[1, 3],
@@ -40,7 +76,7 @@ pollGrab <- function(poll) {
 # as we're downloding this over the internet
 # also it allows us to put in a wait statement if we want
 
-stateDfGen <- function(state, topic) {
+stateDfGen <- function(state, topic = NULL) {
   n <- 10
   i <- 1
   while (n == 10) {
@@ -68,6 +104,8 @@ stateDfGen <- function(state, topic) {
   df.out <- ldply(polls.by.question)
   return(df.out)
 }
+
+
 
 
 
