@@ -1,5 +1,6 @@
 library(ggplot2)
-pres.out <- pres.scratch
+library(scales)
+
 by.state.df <- data.frame(state = tolower(state.name),
                           Obama = NA)
 state.polls <- ddply(pres.out, "state", summarise, 
@@ -12,5 +13,8 @@ by.state.df[, "state"] <- factor(by.state.df[, "state"])
 
 states_map <- map_data("state")
 
-ggplot(by.state.df, aes(map_id = state)) + geom_map(aes(fill = Obama), map = states_map) + expand_limits(x = states_map$long, y = states_map$lat)
+ggplot(by.state.df, aes(map_id = state)) + geom_map(aes(fill = Obama), map = states_map) +
+  expand_limits(x = states_map$long, y = states_map$lat)
+
+
 
