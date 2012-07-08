@@ -1,15 +1,18 @@
 library(ggplot2)
 library(scales)
 
-by.state.df <- data.frame(state = tolower(state.name),
-                          Obama = NA)
 state.polls <- ddply(pres.out, "state", summarise, 
-                     Obama = mean(Obama, na.rm = TRUE))
+                     Obama = mean(Obama, na.rm = TRUE),
+                     Merged = mean(Merged.Approval, na.rm = TRUE),
+                     Polls = length(Obama))
+
 state.polls <- state.polls[state.polls[, "state"] != "US", ]
 state.polls[, "state"] <- tolower(state.name[state.abb %in% state.polls[, "state"]])
 
-by.state.df[by.state.df[, "state"] %in% state.polls[, "state"], ] <- state.polls
+by.state.df <- merge(data.frame(state = tolower(state.name)), state.polls, by = "state")
+
 by.state.df[, "state"] <- factor(by.state.df[, "state"])
+by.state.df[, "Obama"] <- rowMeans(by.state.df[, c("Obama", "Merged")], na.rm = TRUE)
 
 states_map <- map_data("state")
 
