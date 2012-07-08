@@ -6,7 +6,8 @@ Relatively simple connection to Huffpo's API
 
 - State polls can be downloaded and parsed into dataframes with the appropriate matching of responses to questions, pollsters, polls and topics. 
 - We mostly ignore the "charts" and "chart" options and stick to "polls"
-- National presidential polls are basically 60% there. 
+- Merge commensurable "approval" responses. This involves some naughty bifurcation of responses but makes everything more sensible.
+- US map works.
 
 ## What may work in the future
 
