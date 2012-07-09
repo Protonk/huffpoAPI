@@ -1,15 +1,18 @@
 library(XML)
 
 toStateAbb <- function(data, name) {
-  if (any(grepl("^[a-z]", data[, name]))) {
-    sname <- tolower(state.name)
-  } else {
-    sname <- state.name
-  }
+  data[, name] <- gsub("^\\s+|\\s+$", "", data[, name])
+  sname <- tolower(state.name)
   # drop non-matching rows and rename
-  data <- data[data[, name] %in% sname, ]
-  data[, name] <- state.abb[match(data[, name], sname)]
-  return(data)
+  if (is.character(data[, name])) {
+    data <- data[tolower(data[, name]) %in% sname, ]
+    data[, name] <- state.abb[match(tolower(data[, name]), sname)]
+    return(data)
+  } else {
+    data <- data[tolower(as.character(data[, name])) %in% sname, ]
+    data[, name] <- factor(state.abb[match(to.lower(as.character(data[, name])), sname)])
+    return(data)
+  }
 }
 
 
@@ -19,8 +22,27 @@ results.2008 <- read.csv("http://www.electoral-vote.com/evp2008/Pres/Final-2008.
 results.2008 <- results.2008[, c("State", "Obama.Pct", "McCain.Pct")]
 results.2008 <- toStateAbb(results.2008, "State")
 
-# registration data http://www.census.gov/hhes/www/socdemo/voting/publications/historical/index.html
-
+# registration data http://www.census.gov/hhes/www/socdemo/voting/publications/p20/2010/tables.html
+reg.table <- read.csv("http://www.census.gov/hhes/www/socdemo/voting/publications/p20/2010/Table4a_2010.csv",
+                      skip = 8, nrows = 52, header = FALSE, as.is = TRUE)
+names(reg.table) <- c("State",
+                      "Population",
+                      "Citizen Population",
+                      "Registered",
+                      "Percent Registered",
+                      "P.Registered MOE",
+                      "Percent Citizen Registered",
+                      "PC.Registered MOE",
+                      "Total Voted",
+                      "Percent Voted",
+                      "P.Voted MOE",
+                      "Percent Citizen Voted",
+                      "PC.Voted MOE")
+reg.table <- reg.table[, c("State", "Population", "Percent Registered", "Percent Voted")]
+reg.table[, "Population"] <- gsub(",", "", reg.table[, "Population"])
+reg.table <- toStateAbb(reg.table, "State")
+                      
+                      
 # electoral votes from http://en.wikipedia.org/wiki/List_of_electoral_votes_by_US_state
 # Canonical, machine-readable sources for 2012 EVs are thin on the ground
 EV.in <- htmlParse("http://en.wikipedia.org/wiki/List_of_electoral_votes_by_US_state")
@@ -49,3 +71,10 @@ sen.table[, c("Start", "End")] <- llply(sen.table[, c("Start", "End")],
 sen.table[grep("Unknown", sen.table[, "Democrat"]), "Democrat"] <- NA
 sen.table[grep("Unknown", sen.table[, "Republican"]), "Republican"] <- NA
 sen.table[!grepl("\\w+", sen.table[, "I"]), "I"] <- NA
+
+
+
+# National Polls. Start of simple imputation
+
+national.polls <- pres.out[pres.out[, "state"] == "US", c("Obama", "observations", "Merged.Approval")]
+
