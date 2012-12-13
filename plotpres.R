@@ -16,7 +16,8 @@ by.state.df[, "Obama"] <- rowMeans(by.state.df[, c("Obama", "Merged")], na.rm = 
 
 states_map <- map_data("state")
 
-ggplot(by.state.df, aes(map_id = state)) + geom_map(aes(fill = Obama), map = states_map) +
+
+ggplot(by.state.df, aes(map_id = State)) + geom_map(aes(fill = Obama), map = states_map) +
   expand_limits(x = states_map$long, y = states_map$lat)
 
 

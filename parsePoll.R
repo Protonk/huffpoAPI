@@ -76,7 +76,7 @@ pollGrab <- function(poll) {
 # as we're downloding this over the internet
 # also it allows us to put in a wait statement if we want
 
-stateDfGen <- function(state, topic = NULL) {
+stateDfGen <- function(state, topic = NULL, merge = FALSE) {
   n <- 10
   i <- 1
   while (n == 10) {
